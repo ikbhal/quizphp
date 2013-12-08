@@ -13,6 +13,7 @@ var fieldDelimiter = "---";
 var score =0;
 $(document).ready(function(){
 	$("#quizTest").hide();
+	$("#quizTestResult").hide();
 	$("#saveBtn").click(function(){
 		quizText = $.trim($("#quizText").val());
 		buildQuiz(quizText);
@@ -140,7 +141,7 @@ function loadQuestion(qi){
 	console.log("qAnswers:" + qAnswers);
 	$("#question").data("qAnswers", qAnswers);
 
-	$("#qText").text(qText);
+	$("#qText").html(qText);
 
 
 //	var qOptionDivClone = $("<div class=\"qOption\"></div>");
@@ -152,7 +153,7 @@ function loadQuestion(qi){
 	$.each( qOptions, function( key, qOption ) {
   		qOptionDiv = qOptionDivClone.clone();
   		
-  		qOptionDiv.text(qOption.text);
+  		qOptionDiv.html(qOption.text);
   		qOptionDiv.data("oId",qOption.id);
 
   		qOptionDiv.appendTo( "#qOptions" );
@@ -169,6 +170,7 @@ function buildQuiz(quizText){
 	var question = "" ;
 	var options = new Array() ;
 	var option = new Object();
+	var optionText = "";
 	var answer  = new Object();
 	var line;
 	var qFlag = true;
@@ -188,14 +190,14 @@ function buildQuiz(quizText){
 		}else if(line == recordDelimiter){
 			//console.log("question end");
 			//decrease oId 
-			oId--;
-			oLen--;
+			//oId--;
+			//oLen--;
 			//build answer object
-			var lastOption = options.pop();
+			//var lastOption = options.pop();
 			answer = new Object();
 			answer.id = aId; 
 			aId++;
-			answer.o_id = oId-1 - oLen + parseInt(lastOption.text) ;
+			answer.o_id = oId-1 - oLen + parseInt(optionText) ;
 			answer.q_id = qId;
 			//array answer
 			var answers = new Array();
@@ -220,24 +222,41 @@ function buildQuiz(quizText){
 			qFlag = true;
 			oLen = 0;
 			options = new Array();
+			question = "";
+			optionText = "";
 		}else if(qFlag){
-			
 			//console.log("q:" + question);
 			if(fieldDelimiter == line){
 				qFlag = false;
 				oFlag = true;
 			}else{
-				question  = question + line;
+				if(question == ""){
+					question = line;
+				}else{
+					question  = question + "<br>" + line;
+				}
 			}
 			
 		}else if(oFlag){
-			option = new Object();
-			option.id = oId;
-			oId ++;
-			option.q_id = qId;
-			option.text = line;
-			oLen++;
-			options.push(option);
+
+			if(fieldDelimiter == line){
+				option = new Object();
+				option.id = oId;
+				oId ++;
+				option.q_id = qId;
+				option.text = optionText;
+				oLen++;
+				options.push(option);
+
+				optionText = "";
+			}else{
+				if(optionText == "")	{
+					optionText =line;
+				}else{
+					optionText = optionText + "<br>" + line;
+				}
+			}
+			
 		}
 	});
 
